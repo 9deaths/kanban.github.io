@@ -33,20 +33,9 @@
             letter-spacing: -0.5px;
         }
         
-        .add-btn {
-            background: #2a2a2e;
-            border: 1px solid #3a3a3e;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        
-        .add-btn:hover {
-            background: #3a3a3e;
-            border-color: #4a4a4e;
+        .last-update {
+            font-size: 12px;
+            color: #666;
         }
         
         .board {
@@ -78,7 +67,6 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: #888;
         }
         
         .column-header .count {
@@ -104,59 +92,12 @@
             border: 1px solid #2a2a2e;
             border-radius: 8px;
             padding: 12px;
-            cursor: grab;
             transition: all 0.2s;
-        }
-        
-        .card:hover {
-            border-color: #3a3a3e;
-            transform: translateY(-1px);
-        }
-        
-        .card:active {
-            cursor: grabbing;
-        }
-        
-        .card.dragging {
-            opacity: 0.5;
-            transform: rotate(3deg);
         }
         
         .card-text {
             font-size: 14px;
             line-height: 1.4;
-            margin-bottom: 8px;
-        }
-        
-        .card-actions {
-            display: flex;
-            gap: 6px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        
-        .card:hover .card-actions {
-            opacity: 1;
-        }
-        
-        .card-actions button {
-            background: transparent;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-        
-        .card-actions button:hover {
-            background: #2a2a2e;
-            color: #888;
-        }
-        
-        .card-actions button.delete:hover {
-            color: #ef4444;
         }
         
         .empty {
@@ -166,85 +107,11 @@
             font-size: 13px;
         }
         
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: #1e1e24;
-            border: 1px solid #2a2a2e;
-            border-radius: 12px;
-            padding: 24px;
-            width: 100%;
-            max-width: 400px;
-        }
-        
-        .modal-content h3 {
-            margin-bottom: 16px;
-            font-size: 18px;
-        }
-        
-        .modal-content input {
-            width: 100%;
-            background: #16161a;
-            border: 1px solid #2a2a2e;
-            border-radius: 8px;
-            padding: 12px;
-            color: #fff;
+        .loading {
+            color: #666;
+            text-align: center;
+            padding: 40px 20px;
             font-size: 14px;
-            margin-bottom: 16px;
-        }
-        
-        .modal-content input:focus {
-            outline: none;
-            border-color: #3a3a3e;
-        }
-        
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-        
-        .modal-actions button {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .modal-actions .cancel {
-            background: transparent;
-            border: 1px solid #3a3a3e;
-            color: #888;
-        }
-        
-        .modal-actions .cancel:hover {
-            background: #2a2a2e;
-        }
-        
-        .modal-actions .save {
-            background: #10b981;
-            border: none;
-            color: #fff;
-        }
-        
-        .modal-actions .save:hover {
-            background: #059669;
         }
         
         @media (max-width: 768px) {
@@ -261,146 +128,75 @@
 <body>
     <div class="header">
         <h1>📋 Канбан</h1>
-        <button class="add-btn" onclick="openModal()">+ Добавить</button>
+        <span class="last-update" id="last-update"></span>
     </div>
     
     <div class="board">
-        <div class="column todo" ondragover="handleDragOver(event)" ondrop="handleDrop(event, 'todo')">
+        <div class="column todo">
             <div class="column-header">
                 <h2>📥 To Do</h2>
                 <span class="count" id="todo-count">0</span>
             </div>
-            <div class="cards" id="todo-cards"></div>
+            <div class="cards" id="todo-cards">
+                <div class="loading">Загрузка...</div>
+            </div>
         </div>
         
-        <div class="column doing" ondragover="handleDragOver(event)" ondrop="handleDrop(event, 'doing')">
+        <div class="column doing">
             <div class="column-header">
                 <h2>📋 В работе</h2>
                 <span class="count" id="doing-count">0</span>
             </div>
-            <div class="cards" id="doing-cards"></div>
+            <div class="cards" id="doing-cards">
+                <div class="loading">Загрузка...</div>
+            </div>
         </div>
         
-        <div class="column done" ondragover="handleDragOver(event)" ondrop="handleDrop(event, 'done')">
+        <div class="column done">
             <div class="column-header">
                 <h2>✅ Готово</h2>
                 <span class="count" id="done-count">0</span>
             </div>
-            <div class="cards" id="done-cards"></div>
-        </div>
-    </div>
-    
-    <div class="modal" id="modal">
-        <div class="modal-content">
-            <h3>Новая задача</h3>
-            <input type="text" id="task-input" placeholder="Что нужно сделать?">
-            <div class="modal-actions">
-                <button class="cancel" onclick="closeModal()">Отмена</button>
-                <button class="save" onclick="addTask()">Добавить</button>
+            <div class="cards" id="done-cards">
+                <div class="loading">Загрузка...</div>
             </div>
         </div>
     </div>
     
     <script>
-        let tasks = JSON.parse(localStorage.getItem('kanban-tasks')) || {
-            todo: [],
-            doing: [],
-            done: []
-        };
-        
-        let draggedCard = null;
-        let draggedFrom = null;
-        
-        function save() {
-            localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
-            render();
-        }
-        
-        function render() {
-            ['todo', 'doing', 'done'].forEach(col => {
-                const container = document.getElementById(`${col}-cards`);
-                const count = document.getElementById(`${col}-count`);
+        // Load tasks from JSON
+        fetch('tasks.json')
+            .then(response => response.json())
+            .then(data => {
+                const tasks = data;
                 
-                count.textContent = tasks[col].length;
-                
-                if (tasks[col].length === 0) {
-                    container.innerHTML = '<div class="empty">Пусто</div>';
-                } else {
-                    container.innerHTML = tasks[col].map((task, i) => `
-                        <div class="card" draggable="true" 
-                             ondragstart="handleDragStart(event, '${col}', ${i})"
-                             ondragend="handleDragEnd(event)">
-                            <div class="card-text">${task}</div>
-                            <div class="card-actions">
-                                ${col !== 'todo' ? `<button onclick="moveTask('${col}', ${i}, 'todo')">←</button>` : ''}
-                                ${col !== 'done' ? `<button onclick="moveTask('${col}', ${i}, 'done')">→</button>` : ''}
-                                <button class="delete" onclick="deleteTask('${col}', ${i})">✕</button>
+                ['todo', 'doing', 'done'].forEach(col => {
+                    const container = document.getElementById(`${col}-cards`);
+                    const count = document.getElementById(`${col}-count`);
+                    
+                    count.textContent = tasks[col].length;
+                    
+                    if (tasks[col].length === 0) {
+                        container.innerHTML = '<div class="empty">Пусто</div>';
+                    } else {
+                        container.innerHTML = tasks[col].map((task, i) => `
+                            <div class="card">
+                                <div class="card-text">${task}</div>
                             </div>
-                        </div>
-                    `).join('');
-                }
+                        `).join('');
+                    }
+                });
+                
+                // Update timestamp
+                const now = new Date().toLocaleString('ru-RU');
+                document.getElementById('last-update').textContent = `Обновлено: ${now}`;
+            })
+            .catch(error => {
+                console.error('Error loading tasks:', error);
+                document.querySelectorAll('.cards').forEach(el => {
+                    el.innerHTML = '<div class="empty">Ошибка загрузки</div>';
+                });
             });
-        }
-        
-        function openModal() {
-            document.getElementById('modal').classList.add('active');
-            document.getElementById('task-input').focus();
-        }
-        
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-            document.getElementById('task-input').value = '';
-        }
-        
-        function addTask() {
-            const input = document.getElementById('task-input');
-            const text = input.value.trim();
-            if (text) {
-                tasks.todo.push(text);
-                save();
-                closeModal();
-            }
-        }
-        
-        function moveTask(from, index, to) {
-            const task = tasks[from].splice(index, 1)[0];
-            tasks[to].push(task);
-            save();
-        }
-        
-        function deleteTask(col, index) {
-            tasks[col].splice(index, 1);
-            save();
-        }
-        
-        function handleDragStart(event, col, index) {
-            draggedCard = { col, index };
-            event.target.classList.add('dragging');
-        }
-        
-        function handleDragEnd(event) {
-            event.target.classList.remove('dragging');
-        }
-        
-        function handleDragOver(event) {
-            event.preventDefault();
-        }
-        
-        function handleDrop(event, toCol) {
-            event.preventDefault();
-            if (draggedCard && draggedCard.col !== toCol) {
-                const task = tasks[draggedCard.col].splice(draggedCard.index, 1)[0];
-                tasks[toCol].push(task);
-                save();
-            }
-            draggedCard = null;
-        }
-        
-        document.getElementById('task-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addTask();
-        });
-        
-        render();
     </script>
 </body>
 </html>
