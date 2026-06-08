@@ -105,7 +105,7 @@ function login(){
         localStorage.setItem('kanban_auth','1');
         document.getElementById('login-overlay').style.display='none';
         document.querySelector('.header-bar').style.display='';
-        document.querySelectorAll('.container')[1].style.display='';
+        document.getElementById('board-container').style.display='';
     } else {
         document.getElementById('login-error').style.display='block';
         document.getElementById('login-pass').value='';
@@ -117,13 +117,13 @@ if(localStorage.getItem('kanban_auth')==='1'){
         const el = document.getElementById('login-overlay');
         if(el) el.style.display='none';
         document.querySelector('.header-bar').style.display='';
-        document.querySelectorAll('.container')[1].style.display='';
+        document.getElementById('board-container').style.display='';
     });
 }
 </script>
 
     <div class="header-bar" style="display:none">
-        <div class="container" style="display:none">
+        <div class="container">
             <div class="row valign-wrapper" style="margin-bottom:0">
                 <div class="col s12 m6">
                     <h1><i class="material-icons left" style="color:#81c784">dashboard</i>Канбан</h1>
@@ -135,7 +135,7 @@ if(localStorage.getItem('kanban_auth')==='1'){
         </div>
     </div>
     
-    <div class="container" style="display:none">
+    <div id="board-container" style="display:none">
         <div class="row">
             <div class="col s12 l4">
                 <div class="kanban-column">
