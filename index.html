@@ -105,7 +105,7 @@ function login(){
         localStorage.setItem('kanban_auth','1');
         document.getElementById('login-overlay').style.display='none';
         document.querySelector('.header-bar').style.display='';
-        document.querySelector('.container').style.display='';
+        document.querySelectorAll('.container')[1].style.display='';
     } else {
         document.getElementById('login-error').style.display='block';
         document.getElementById('login-pass').value='';
@@ -117,7 +117,7 @@ if(localStorage.getItem('kanban_auth')==='1'){
         const el = document.getElementById('login-overlay');
         if(el) el.style.display='none';
         document.querySelector('.header-bar').style.display='';
-        document.querySelector('.container').style.display='';
+        document.querySelectorAll('.container')[1].style.display='';
     });
 }
 </script>
