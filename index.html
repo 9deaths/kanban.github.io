@@ -33,6 +33,11 @@
             padding: 16px;
             min-height: 500px;
             border: 1px solid #333;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .kanban-column.drag-over {
+            border-color: #81c784;
+            background: #1a2a1a;
         }
         .kanban-column .column-title {
             font-size: 1.1rem;
@@ -43,6 +48,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            user-select: none;
         }
         .kanban-column .column-title .badge {
             background: #333;
@@ -59,11 +65,38 @@
             margin-bottom: 10px;
             font-size: 0.95rem;
             transition: all 0.2s ease;
+            cursor: grab;
+            user-select: none;
+            position: relative;
         }
         .card-panel-kanban:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             border-color: #555;
+        }
+        .card-panel-kanban:active {
+            cursor: grabbing;
+        }
+        .card-panel-kanban.dragging {
+            opacity: 0.5;
+            border: 1px dashed #81c784;
+            transform: rotate(2deg);
+        }
+        .card-delete-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            color: #666;
+            cursor: pointer;
+            font-size: 1rem;
+            display: none;
+            transition: color 0.2s;
+        }
+        .card-panel-kanban:hover .card-delete-btn {
+            display: block;
+        }
+        .card-delete-btn:hover {
+            color: #e53935;
         }
         .empty-state {
             color: #555;
@@ -79,6 +112,70 @@
         .todo-title { color: #90a4ae; }
         .doing-title { color: #ffb74d; }
         .done-title { color: #81c784; }
+        .fab-add {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+        }
+        .btn-floating {
+            background: #81c784;
+        }
+        .btn-floating:hover {
+            background: #66bb6a;
+        }
+        .modal {
+            background: #1e1e1e;
+            border-radius: 12px;
+            color: #e0e0e0;
+        }
+        .modal .modal-footer {
+            background: #1e1e1e;
+            border-top: 1px solid #333;
+        }
+        .modal .modal-footer .btn {
+            background: #81c784;
+        }
+        .modal .modal-footer .btn:hover {
+            background: #66bb6a;
+        }
+        .modal .modal-footer .modal-close.btn-flat {
+            color: #aaa;
+        }
+        .input-field input {
+            color: #e0e0e0;
+            border-bottom: 1px solid #555;
+        }
+        .input-field input:focus {
+            border-bottom: 1px solid #81c784;
+            box-shadow: 0 1px 0 0 #81c784;
+        }
+        .input-field label {
+            color: #888;
+        }
+        .input-field input:focus + label {
+            color: #81c784;
+        }
+        .column-select .select-wrapper {
+            max-width: 200px;
+        }
+        .select-dropdown.dropdown-content {
+            background: #252525;
+        }
+        .select-dropdown.dropdown-content li > a, .select-dropdown.dropdown-content li > span {
+            color: #e0e0e0;
+        }
+        .select-dropdown.dropdown-content li:hover {
+            background: #333;
+        }
+        .reset-btn {
+            color: #888;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .reset-btn:hover {
+            color: #e0e0e0;
+        }
         @media (max-width: 992px) {
             .kanban-column { min-height: 300px; }
         }
@@ -93,84 +190,263 @@
                 </div>
                 <div class="col s12 m6 right-align">
                     <span class="last-update" id="last-update"></span>
+                    <div class="reset-btn" onclick="resetData()">
+                        <i class="material-icons tiny" style="vertical-align:middle">refresh</i> Сбросить
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <div class="container">
         <div class="row">
             <div class="col s12 l4">
-                <div class="kanban-column">
+                <div class="kanban-column" id="col-todo" data-column="todo">
                     <div class="column-title todo-title">
                         <span><i class="material-icons left tiny">inbox</i>To Do</span>
                         <span class="badge" id="todo-count">0</span>
                     </div>
-                    <div id="todo-cards">
+                    <div id="todo-cards" class="cards-container">
                         <div class="loading-state">Загрузка...</div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="col s12 l4">
-                <div class="kanban-column">
+                <div class="kanban-column" id="col-doing" data-column="doing">
                     <div class="column-title doing-title">
                         <span><i class="material-icons left tiny">assignment</i>В работе</span>
                         <span class="badge" id="doing-count">0</span>
                     </div>
-                    <div id="doing-cards">
+                    <div id="doing-cards" class="cards-container">
                         <div class="loading-state">Загрузка...</div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="col s12 l4">
-                <div class="kanban-column">
+                <div class="kanban-column" id="col-done" data-column="done">
                     <div class="column-title done-title">
                         <span><i class="material-icons left tiny">check_circle</i>Готово</span>
                         <span class="badge" id="done-count">0</span>
                     </div>
-                    <div id="done-cards">
+                    <div id="done-cards" class="cards-container">
                         <div class="loading-state">Загрузка...</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
+    <div class="fixed-action-btn fab-add">
+        <a class="btn-floating btn-large waves-effect waves-light" onclick="openAddModal()">
+            <i class="material-icons">add</i>
+        </a>
+    </div>
+
+    <div id="add-modal" class="modal">
+        <div class="modal-content">
+            <h4>Новая задача</h4>
+            <div class="input-field">
+                <input type="text" id="new-task-text" required>
+                <label for="new-task-text">Текст задачи</label>
+            </div>
+            <div class="input-field column-select">
+                <select id="new-task-column">
+                    <option value="todo" selected>To Do</option>
+                    <option value="doing">В работе</option>
+                    <option value="done">Готово</option>
+                </select>
+                <label>Колонка</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect btn-flat">Отмена</a>
+            <a href="#!" class="waves-effect btn" onclick="addTask()">Добавить</a>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
-        fetch('tasks.json')
-            .then(response => response.json())
-            .then(data => {
-                const tasks = data;
-                
-                ['todo', 'doing', 'done'].forEach(col => {
-                    const container = document.getElementById(`${col}-cards`);
-                    const count = document.getElementById(`${col}-count`);
-                    
-                    count.textContent = tasks[col].length;
-                    
-                    if (tasks[col].length === 0) {
-                        container.innerHTML = '<div class="empty-state">Пусто</div>';
-                    } else {
-                        container.innerHTML = tasks[col].map((task) => `
-                            <div class="card-panel-kanban">
-                                ${task}
-                            </div>
-                        `).join('');
-                    }
+        const STORAGE_KEY = 'kanban_data';
+        let tasks = {};
+
+        // --- Загрузка данных ---
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    tasks = JSON.parse(saved);
+                    renderAll();
+                    return;
+                } catch (e) {
+                    console.error('Bad localStorage data', e);
+                }
+            }
+            // Иначе загружаем из tasks.json
+            fetch('tasks.json')
+                .then(r => r.json())
+                .then(data => {
+                    tasks = data;
+                    saveLocal();
+                    renderAll();
+                })
+                .catch(err => {
+                    console.error('Error loading tasks.json', err);
+                    tasks = { todo: [], doing: [], done: [] };
+                    renderAll();
                 });
-                
-                const now = new Date().toLocaleString('ru-RU');
-                document.getElementById('last-update').textContent = `Обновлено: ${now}`;
-            })
-            .catch(error => {
-                console.error('Error loading tasks:', error);
-                document.querySelectorAll('[id$="-cards"]').forEach(el => {
-                    el.innerHTML = '<div class="empty-state">Ошибка загрузки</div>';
-                });
+        }
+
+        function saveLocal() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+        }
+
+        function resetData() {
+            if (confirm('Сбросить все задачи к начальным?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                loadData();
+            }
+        }
+
+        // --- Рендеринг ---
+        function renderColumn(col) {
+            const container = document.getElementById(col + '-cards');
+            const count = document.getElementById(col + '-count');
+            count.textContent = tasks[col].length;
+
+            if (tasks[col].length === 0) {
+                container.innerHTML = '<div class="empty-state">Пусто</div>';
+                return;
+            }
+
+            container.innerHTML = tasks[col].map((task, idx) => `
+                <div class="card-panel-kanban" draggable="true"
+                     data-column="${col}" data-index="${idx}">
+                    <span class="card-text">${escapeHtml(task)}</span>
+                    <i class="material-icons card-delete-btn" onclick="deleteTask('${col}', ${idx})">close</i>
+                </div>
+            `).join('');
+
+            // Привязать события DnD
+            container.querySelectorAll('.card-panel-kanban').forEach(card => {
+                card.addEventListener('dragstart', onDragStart);
+                card.addEventListener('dragend', onDragEnd);
             });
+        }
+
+        function renderAll() {
+            ['todo', 'doing', 'done'].forEach(renderColumn);
+            const now = new Date().toLocaleString('ru-RU');
+            document.getElementById('last-update').textContent = `Обновлено: ${now}`;
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // --- Drag & Drop ---
+        let draggedCard = null;
+        let dragSourceColumn = null;
+        let dragSourceIndex = null;
+
+        function onDragStart(e) {
+            draggedCard = e.target;
+            dragSourceColumn = e.target.dataset.column;
+            dragSourceIndex = parseInt(e.target.dataset.index, 10);
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', dragSourceColumn + ':' + dragSourceIndex);
+        }
+
+        function onDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedCard = null;
+            dragSourceColumn = null;
+            dragSourceIndex = null;
+            document.querySelectorAll('.kanban-column').forEach(c => c.classList.remove('drag-over'));
+        }
+
+        // Сделать колонки drop zones
+        document.querySelectorAll('.kanban-column').forEach(col => {
+            col.addEventListener('dragover', e => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                col.classList.add('drag-over');
+            });
+
+            col.addEventListener('dragleave', e => {
+                // Проверяем, что мы реально покинули колонку, а не вошли в дочерний элемент
+                if (!col.contains(e.relatedTarget)) {
+                    col.classList.remove('drag-over');
+                }
+            });
+
+            col.addEventListener('drop', e => {
+                e.preventDefault();
+                col.classList.remove('drag-over');
+
+                const targetColumn = col.dataset.column;
+                const source = e.dataTransfer.getData('text/plain');
+                if (!source) return;
+                const [sourceCol, sourceIdx] = source.split(':');
+                const idx = parseInt(sourceIdx, 10);
+
+                if (sourceCol === targetColumn) {
+                    // Перемещение внутри одной колонки — пока ничего не делаем (можно реализовать сортировку)
+                    return;
+                }
+
+                // Извлечь задачу из источника
+                const task = tasks[sourceCol].splice(idx, 1)[0];
+                if (!task) return;
+
+                // Вставить в цель (в конец)
+                tasks[targetColumn].push(task);
+
+                saveLocal();
+                renderAll();
+            });
+        });
+
+        // --- Управление задачами ---
+        function openAddModal() {
+            const modal = document.getElementById('add-modal');
+            M.Modal.getInstance(modal).open();
+            setTimeout(() => document.getElementById('new-task-text').focus(), 100);
+        }
+
+        function addTask() {
+            const text = document.getElementById('new-task-text').value.trim();
+            const col = document.getElementById('new-task-column').value;
+            if (!text) return; // Materialize сама валидирует, но на всякий случай
+
+            tasks[col].push(text);
+            saveLocal();
+            renderAll();
+            document.getElementById('new-task-text').value = '';
+            M.Modal.getInstance(document.getElementById('add-modal')).close();
+        }
+
+        function deleteTask(col, idx) {
+            tasks[col].splice(idx, 1);
+            saveLocal();
+            renderAll();
+        }
+
+        // Enter в поле задачи
+        document.getElementById('new-task-text').addEventListener('keydown', e => {
+            if (e.key === 'Enter') addTask();
+        });
+
+        // Инициализация Materialize
+        document.addEventListener('DOMContentLoaded', () => {
+            M.Modal.init(document.querySelectorAll('.modal'));
+            M.FormSelect.init(document.querySelectorAll('select'));
+            loadData();
+        });
     </script>
 </body>
 </html>
