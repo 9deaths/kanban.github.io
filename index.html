@@ -3,168 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📋 Канбан 2 </title>
+    <title>Канбан</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a3d0a;
+            background: #121212;
             color: #e0e0e0;
             min-height: 100vh;
-            padding: 20px;
         }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .header-bar {
+            background: #1e1e1e;
+            padding: 20px 0;
             margin-bottom: 30px;
-            padding: 0 10px;
+            border-bottom: 1px solid #333;
         }
-        
-        .header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
+        .header-bar h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            color: #fff;
         }
-        
-        .last-update {
-            font-size: 12px;
-            color: #666;
+        .header-bar .last-update {
+            color: #888;
+            font-size: 0.9rem;
         }
-        
-        .board {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .column {
-            background: #1a3a1a;
-            border-radius: 12px;
+        .kanban-column {
+            background: #1e1e1e;
+            border-radius: 8px;
             padding: 16px;
-            min-height: 400px;
+            min-height: 500px;
+            border: 1px solid #333;
         }
-        
-        .column-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .kanban-column .column-title {
+            font-size: 1.1rem;
+            font-weight: 600;
             margin-bottom: 16px;
             padding-bottom: 12px;
-            border-bottom: 1px solid #2a2a2e;
-        }
-        
-        .column-header h2 {
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .column-header .count {
-            background: #2a2a2e;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-            color: #666;
-        }
-        
-        .todo .column-header h2 { color: #6b7280; }
-        .doing .column-header h2 { color: #f59e0b; }
-        .done .column-header h2 { color: #10b981; }
-        
-        .cards {
+            border-bottom: 1px solid #333;
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
         }
-        
-        .card {
-            background: #1e5e1e;
-            border: 1px solid #2a6a2a;
-            border-radius: 8px;
-            padding: 12px;
-            transition: all 0.2s;
+        .kanban-column .column-title .badge {
+            background: #333;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: #aaa;
         }
-        
-        .card-text {
-            font-size: 14px;
-            line-height: 1.4;
+        .card-panel-kanban {
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
         }
-        
-        .empty {
-            color: #444;
+        .card-panel-kanban:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border-color: #555;
+        }
+        .empty-state {
+            color: #555;
             text-align: center;
             padding: 40px 20px;
-            font-size: 13px;
+            font-size: 0.9rem;
         }
-        
-        .loading {
+        .loading-state {
             color: #666;
             text-align: center;
             padding: 40px 20px;
-            font-size: 14px;
         }
-        
-        @media (max-width: 768px) {
-            .board {
-                grid-template-columns: 1fr;
-            }
-            
-            .column {
-                min-height: 200px;
-            }
+        .todo-title { color: #90a4ae; }
+        .doing-title { color: #ffb74d; }
+        .done-title { color: #81c784; }
+        @media (max-width: 992px) {
+            .kanban-column { min-height: 300px; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>📋 Канбан</h1>
-        <span class="last-update" id="last-update"></span>
-    </div>
-    
-    <div class="board">
-        <div class="column todo">
-            <div class="column-header">
-                <h2>📥 To Do</h2>
-                <span class="count" id="todo-count">0</span>
-            </div>
-            <div class="cards" id="todo-cards">
-                <div class="loading">Загрузка...</div>
-            </div>
-        </div>
-        
-        <div class="column doing">
-            <div class="column-header">
-                <h2>📋 В работе</h2>
-                <span class="count" id="doing-count">0</span>
-            </div>
-            <div class="cards" id="doing-cards">
-                <div class="loading">Загрузка...</div>
-            </div>
-        </div>
-        
-        <div class="column done">
-            <div class="column-header">
-                <h2>✅ Готово</h2>
-                <span class="count" id="done-count">0</span>
-            </div>
-            <div class="cards" id="done-cards">
-                <div class="loading">Загрузка...</div>
+    <div class="header-bar">
+        <div class="container">
+            <div class="row valign-wrapper" style="margin-bottom:0">
+                <div class="col s12 m6">
+                    <h1><i class="material-icons left" style="color:#81c784">dashboard</i>Канбан</h1>
+                </div>
+                <div class="col s12 m6 right-align">
+                    <span class="last-update" id="last-update"></span>
+                </div>
             </div>
         </div>
     </div>
     
+    <div class="container">
+        <div class="row">
+            <div class="col s12 l4">
+                <div class="kanban-column">
+                    <div class="column-title todo-title">
+                        <span><i class="material-icons left tiny">inbox</i>To Do</span>
+                        <span class="badge" id="todo-count">0</span>
+                    </div>
+                    <div id="todo-cards">
+                        <div class="loading-state">Загрузка...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col s12 l4">
+                <div class="kanban-column">
+                    <div class="column-title doing-title">
+                        <span><i class="material-icons left tiny">assignment</i>В работе</span>
+                        <span class="badge" id="doing-count">0</span>
+                    </div>
+                    <div id="doing-cards">
+                        <div class="loading-state">Загрузка...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col s12 l4">
+                <div class="kanban-column">
+                    <div class="column-title done-title">
+                        <span><i class="material-icons left tiny">check_circle</i>Готово</span>
+                        <span class="badge" id="done-count">0</span>
+                    </div>
+                    <div id="done-cards">
+                        <div class="loading-state">Загрузка...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
-        // Load tasks from JSON
         fetch('tasks.json')
             .then(response => response.json())
             .then(data => {
@@ -177,24 +152,23 @@
                     count.textContent = tasks[col].length;
                     
                     if (tasks[col].length === 0) {
-                        container.innerHTML = '<div class="empty">Пусто</div>';
+                        container.innerHTML = '<div class="empty-state">Пусто</div>';
                     } else {
-                        container.innerHTML = tasks[col].map((task, i) => `
-                            <div class="card">
-                                <div class="card-text">${task}</div>
+                        container.innerHTML = tasks[col].map((task) => `
+                            <div class="card-panel-kanban">
+                                ${task}
                             </div>
                         `).join('');
                     }
                 });
                 
-                // Update timestamp
                 const now = new Date().toLocaleString('ru-RU');
                 document.getElementById('last-update').textContent = `Обновлено: ${now}`;
             })
             .catch(error => {
                 console.error('Error loading tasks:', error);
-                document.querySelectorAll('.cards').forEach(el => {
-                    el.innerHTML = '<div class="empty">Ошибка загрузки</div>';
+                document.querySelectorAll('[id$="-cards"]').forEach(el => {
+                    el.innerHTML = '<div class="empty-state">Ошибка загрузки</div>';
                 });
             });
     </script>
